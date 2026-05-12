@@ -39,3 +39,14 @@ export async function fetchLatestEvents(query: EventsQuery = {}): Promise<Survei
 }
 
 export const SSE_EVENTS_URL = `${API_BASE_URL}/events/stream`;
+
+/**
+ * Converts a relative snapshot path (e.g. "snapshots/2025-01-15/file.jpg")
+ * returned by the backend into a full URL the browser can load.
+ * Returns null when the event has no snapshot.
+ */
+export function snapshotUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${API_BASE_URL}/${path}`;
+}

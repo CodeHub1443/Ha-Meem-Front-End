@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Bell, Camera, Users, Settings, Terminal, Shield } from "lucide-react";
+import { LayoutDashboard, Bell, Camera, Users, Settings, Terminal, Shield, FileBarChart2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const items = [
@@ -7,6 +7,7 @@ const items = [
   { to: "/events", key: "nav.events", icon: Bell },
   { to: "/live", key: "nav.live", icon: Camera },
   { to: "/gallery", key: "nav.gallery", icon: Users },
+  { to: "/reports", key: "nav.reports", icon: FileBarChart2 },
   { to: "/settings", key: "nav.settings", icon: Settings },
   { to: "/debug", key: "nav.debug", icon: Terminal },
 ] as const;

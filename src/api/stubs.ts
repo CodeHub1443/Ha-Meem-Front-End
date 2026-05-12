@@ -6,16 +6,13 @@ import type { Person } from "@/types/surveillance";
 
 const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
-// TODO: Replace with real backend endpoint when implemented.
 export async function requestSnapshot(cameraId: string): Promise<{ image_base64: string; timestamp: string }> {
-  void cameraId;
-  await delay(800);
-  // 1x1 transparent png placeholder
-  return {
-    image_base64:
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
-    timestamp: new Date().toISOString(),
-  };
+  const res = await fetch(`${API_BASE_URL}/cameras/${cameraId}/snapshot`, { method: "POST" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { detail?: string };
+    throw new Error(body.detail ?? `Snapshot failed: ${res.status}`);
+  }
+  return res.json() as Promise<{ image_base64: string; timestamp: string }>;
 }
 
 // TODO: Replace with real backend endpoint when implemented.
@@ -32,14 +29,10 @@ export async function saveSettings(payload: unknown): Promise<{ success: boolean
   return { success: true };
 }
 
-// TODO: Replace with real backend endpoint when implemented.
 export async function fetchPersons(): Promise<Person[]> {
-  await delay();
-  return [
-    { id: "p1", name: "John Doe", sample_count: 12, thumbnail_url: null },
-    { id: "p2", name: "Jane Smith", sample_count: 8, thumbnail_url: null },
-    { id: "p3", name: "Ahmed Hassan", sample_count: 15, thumbnail_url: null },
-  ];
+  const res = await fetch(`${API_BASE_URL}/persons`);
+  if (!res.ok) throw new Error(`Failed to fetch persons: ${res.status}`);
+  return res.json() as Promise<Person[]>;
 }
 
 // TODO: Replace with real backend endpoint when implemented.
@@ -56,7 +49,8 @@ export async function deletePerson(id: string): Promise<{ success: boolean }> {
   return { success: true };
 }
 
-// TODO: Replace with real backend endpoint when implemented.
+// TODO: Replace with a real backend endpoint that runs extract_faces.py then
+//       build_gallery.py sequentially and returns a job_id for status polling.
 export async function buildGallery(): Promise<{ job_id: string }> {
   await delay();
   return { job_id: `job_${Date.now()}` };
@@ -64,18 +58,34 @@ export async function buildGallery(): Promise<{ job_id: string }> {
 
 let _buildProgress = 0;
 // TODO: Replace with real backend endpoint when implemented.
-export async function fetchBuildStatus(): Promise<{ status: "idle" | "running" | "done"; progress: number; message: string }> {
+// The backend runs two steps: (1) extract_faces.py  0-50%
+//                             (2) build_gallery.py 50-100%
+export async function fetchBuildStatus(): Promise<{
+  status: "idle" | "running" | "done";
+  progress: number;
+  message: string;
+}> {
   await delay(150);
-  _buildProgress = Math.min(100, _buildProgress + 12);
+  _buildProgress = Math.min(100, _buildProgress + 8);
   const status = _buildProgress >= 100 ? "done" : "running";
-  let message = "Processing face images...";
-  if (_buildProgress > 30) message = "Generating embeddings...";
-  if (_buildProgress > 65) message = "Clustering prototypes...";
+  let message = "Step 1/2: Extracting faces from raw frames…";
+  if (_buildProgress > 45) message = "Step 2/2: Building gallery embeddings…";
+  if (_buildProgress > 80) message = "Step 2/2: Clustering embedding prototypes…";
   if (_buildProgress >= 100) {
     message = "Gallery ready!";
     setTimeout(() => (_buildProgress = 0), 1500);
   }
   return { status, progress: _buildProgress, message };
+}
+
+// TODO: Replace with real backend endpoint when implemented.
+// Should return relative paths to aligned face crops stored in
+// data/aligned_faces/{person_id}/ on the server.
+export async function fetchPersonSamples(personId: string): Promise<string[]> {
+  void personId;
+  await delay(400);
+  // Return empty array until backend serves the actual aligned face images
+  return [];
 }
 
 // TODO: Replace with real backend endpoint when implemented.

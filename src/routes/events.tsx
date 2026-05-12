@@ -71,6 +71,7 @@ function EventsPage() {
         event_type: appliedFilters.event_type === "ALL" ? undefined : appliedFilters.event_type,
         since: appliedFilters.since,
       }),
+    refetchInterval: 20000,
     retry: false,
   });
 

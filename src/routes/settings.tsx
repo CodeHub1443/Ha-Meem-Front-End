@@ -18,7 +18,8 @@ import { useSettings, DEFAULT_SETTINGS } from "@/context/SettingsContext";
 import { saveSettings, testCamera, sendWhatsAppTest } from "@/api/stubs";
 import { fetchHealth } from "@/api/events";
 import type { AppSettings, Camera as CameraType } from "@/types/surveillance";
-import { Lock, Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
+import { Lock, Eye, EyeOff, Plus, Trash2, X, Crop } from "lucide-react";
+import { ROICanvas } from "@/components/shared/ROICanvas";
 
 export const Route = createFileRoute("/settings")({ component: SettingsPage });
 
@@ -80,6 +81,7 @@ function CamerasTab({ draft, setDraft }: { draft: AppSettings; setDraft: (s: App
   const [unlocked, setUnlocked] = useState<Record<string, boolean>>({});
   const [showRtsp, setShowRtsp] = useState<Record<string, boolean>>({});
   const [testing, setTesting] = useState<Record<string, "idle" | "ok" | "err" | "loading">>({});
+  const [roiOpen, setRoiOpen] = useState<string | null>(null); // camera id whose ROI dialog is open
 
   const update = (id: string, patch: Partial<CameraType>) => {
     setDraft({ ...draft, cameras: draft.cameras.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
@@ -154,10 +156,34 @@ function CamerasTab({ draft, setDraft }: { draft: AppSettings; setDraft: (s: App
             </div>
 
             <div>
-              <Label className="text-xs">{t("settings.roi")}</Label>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-xs">{t("settings.roi")}</Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={() => setRoiOpen(c.id)}
+                >
+                  <Crop className="h-3.5 w-3.5 mr-1.5" />
+                  {t("settings.roiDraw")}
+                </Button>
+              </div>
+              {/* Manual numeric override — still editable for precision */}
               <div className="grid grid-cols-4 gap-2">
                 {(["x1", "y1", "x2", "y2"] as const).map((k) => (
-                  <Input key={k} type="number" value={c.roi[k]} onChange={(e) => update(c.id, { roi: { ...c.roi, [k]: Number(e.target.value) } })} placeholder={k} />
+                  <div key={k}>
+                    <span className="text-[10px] text-muted-foreground uppercase">{k}</span>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={k === "x2" ? 7680 : 4320}
+                      value={c.roi[k]}
+                      onChange={(e) =>
+                        update(c.id, { roi: { ...c.roi, [k]: Math.max(0, Number(e.target.value)) } })
+                      }
+                    />
+                  </div>
                 ))}
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">{t("settings.roiHint")}</p>
@@ -188,6 +214,18 @@ function CamerasTab({ draft, setDraft }: { draft: AppSettings; setDraft: (s: App
         title={t("common.delete")} description={t("gallery.deleteWarn")} destructive
         onConfirm={() => delConfirm && removeCamera(delConfirm)}
       />
+
+      {(() => {
+        const cam = draft.cameras.find((c) => c.id === roiOpen);
+        return cam ? (
+          <ROICanvas
+            open={!!roiOpen}
+            onOpenChange={(o) => !o && setRoiOpen(null)}
+            camera={cam}
+            onConfirm={(roi) => update(cam.id, { roi })}
+          />
+        ) : null;
+      })()}
     </div>
   );
 }

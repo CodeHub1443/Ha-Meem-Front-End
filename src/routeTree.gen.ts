@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as EventsRouteImport } from './routes/events'
@@ -20,6 +21,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LiveRoute = LiveRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/gallery': typeof GalleryRoute
   '/live': typeof LiveRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/gallery': typeof GalleryRoute
   '/live': typeof LiveRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/gallery': typeof GalleryRoute
   '/live': typeof LiveRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/gallery'
     | '/live'
+    | '/reports'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/gallery'
     | '/live'
+    | '/reports'
     | '/settings'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/gallery'
     | '/live'
+    | '/reports'
     | '/settings'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   GalleryRoute: typeof GalleryRoute
   LiveRoute: typeof LiveRoute
+  ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/live': {
@@ -182,8 +202,19 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   GalleryRoute: GalleryRoute,
   LiveRoute: LiveRoute,
+  ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

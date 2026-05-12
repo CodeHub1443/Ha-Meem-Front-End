@@ -60,4 +60,5 @@ export interface Person {
   name: string;
   sample_count: number;
   thumbnail_url: string | null;
+  avg_accuracy: number | null;
 }

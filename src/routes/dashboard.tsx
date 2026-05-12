@@ -131,7 +131,7 @@ function DashboardPage() {
           <Card className="lg:col-span-2 p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4">{t("dashboard.breakdown")}</h2>
             <div className="relative h-[240px]">
-              <ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={pieData} dataKey="value" innerRadius={60} outerRadius={90} paddingAngle={2} stroke="none">
                     {pieData.map((d, i) => (

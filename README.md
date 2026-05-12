@@ -62,7 +62,7 @@ VITE_API_BASE_URL=http://your-surveillance-api-ip:5000
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/CodeHub1443/vigil-vision-app.git
+git clone https://github.com/CodeHub1443/Ha-Meem-Front-End.git
 
 # Navigate to the directory
 cd vigil-vision-app
